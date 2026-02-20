@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card card-custom p-4">
+            <h3 class="text-center mb-4">Create Account</h3>
+
+```
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+
+
+        <form method="post">
+            {% csrf_token %}
+
+            <input class="form-control mb-3" name="email" placeholder="Email">
+            <input class="form-control mb-3" name="username" placeholder="Username">
+            <input class="form-control mb-3" name="password" type="password" placeholder="Password">
+
+            <button class="btn btn-theme w-100">Register</button>
+        </form>
+
+        <p class="text-center mt-3">
+            Already have an account? <a href="/">Login</a>
+        </p>
+    </div>
+</div>
+```
+
+</div>
+
+{% endblock %}

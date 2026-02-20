@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card card-custom p-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4>Chat with {{ other_user.username }}</h4>
+        <a href="/users/" class="btn btn-secondary btn-sm">← Back</a>
+    </div>
+
+```
+<hr>
+
+<!-- Chat Messages -->
+<div id="chat-box" class="chat-box mb-2">
+    {% for msg in messages %}
+        {% if msg.sender == request.user %}
+            <div class="msg-sent">
+                {{ msg.content }}
+                <small>✓{% if msg.is_read %}✓{% endif %}</small>
+            </div>
+        {% else %}
+            <div class="msg-received">
+                {{ msg.content }}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Typing Indicator -->
+<div id="typing" class="mb-2" style="color:gray;height:20px;"></div>
+
+<!-- Message Input -->
+<div class="input-group">
+    <input id="message" class="form-control" placeholder="Type a message...">
+    <button onclick="sendMessage()" class="btn btn-theme">Send</button>
+</div>
+```
+
+</div>
+
+<script>
+/* -----------------------------
+   WebSocket Connection
+------------------------------ */
+const socket = new WebSocket(
+    "ws://" + window.location.host + "/ws/chat/{{ request.user.id }}_{{ other_user.id }}/"
+);
+
+const chatBox = document.getElementById("chat-box");
+const typingBox = document.getElementById("typing");
+const messageInput = document.getElementById("message");
+
+/* -----------------------------
+   Receive Messages
+------------------------------ */
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    // Typing event
+    if (data.typing) {
+        typingBox.innerHTML = data.user + " is typing...";
+        setTimeout(() => typingBox.innerHTML = "", 1000);
+        return;
+    }
+
+    // Message event
+    chatBox.innerHTML += `
+        <div class="msg-received">
+            ${data.message}
+        </div>
+    `;
+
+    scrollToBottom();
+};
+
+/* -----------------------------
+   Send Message
+------------------------------ */
+function sendMessage() {
+    let msg = messageInput.value;
+
+    if (msg.trim() === "") return; // prevent empty message
+
+    socket.send(JSON.stringify({
+        message: msg,
+        receiver: "{{ other_user.id }}"
+    }));
+
+    // Show instantly on sender side
+    chatBox.innerHTML += `
+        <div class="msg-sent">
+            ${msg} <small>✓</small>
+        </div>
+    `;
+
+    messageInput.value = "";
+    scrollToBottom();
+}
+
+/* -----------------------------
+   Typing Detection
+------------------------------ */
+messageInput.addEventListener("keyup", () => {
+    socket.send(JSON.stringify({ typing: true }));
+});
+
+/* -----------------------------
+   Auto Scroll Function
+------------------------------ */
+function scrollToBottom() {
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Scroll when page loads
+scrollToBottom();
+</script>
+
+{% endblock %}
