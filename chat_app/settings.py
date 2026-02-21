@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-c6q&hbz9r^4m1wb6$&)8o^wrbnw8&(_^bnyj)!l#$ncr3b(lg$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "chat-app-yjr0.onrender.com",
+    "127.0.0.1",
+    "localhost",
+]
 
 
 # Application definition
@@ -130,4 +134,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://chat-app-yjr0.onrender.com",
 ]
